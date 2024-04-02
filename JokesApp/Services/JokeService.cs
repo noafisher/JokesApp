@@ -72,27 +72,21 @@ namespace JokesApp.Services
 
 
 
-        public async Task<Categories> GetCategories()
-        {
-            Categories c = null;
-            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync($"{URL}categories");
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-
-                string jSon = await httpResponseMessage.Content.ReadAsStringAsync();
-                c = JsonSerializer.Deserialize<Categories>(jSon,options);
-
-            }
-
-            return c;
-        }
-
+        
 
         public async Task<Joke> GetOneLiner()
         {
             Joke j = null;
-            HttpResponseMessage response = await httpClient.GetAsync($"{URL}joke/Any?safe-mode");
+            HttpResponseMessage response = await httpClient.GetAsync($"{URL}joke/Any?type=single");
+            if (response.IsSuccessStatusCode)
+            {
+                string jsonString = await response.Content.ReadAsStringAsync();
+                j = JsonSerializer.Deserialize<Joke>(jsonString,options);
+                return j;
+
+            }
+             return null;
+
         }
 
 
@@ -121,6 +115,25 @@ namespace JokesApp.Services
             return false;
             return false;
 
+        }
+        public async Task<List<string>> GetCategories()
+        {
+            try
+            {
+                var response = await httpClient.GetAsync($"{URL} catagories");
+                if (response.StatusCode == System.Net.HttpStatusCode.OK) 
+                {
+                    string jsonString = await response.Content.ReadAsStringAsync();
+                    Categories g = JsonSerializer.Deserialize<Categories>(jsonString);
+                    return g.CategoriesList.ToList();
+                }
+                return null;
+            }
+
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 
